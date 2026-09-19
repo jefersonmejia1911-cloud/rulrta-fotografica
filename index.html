@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ruleta de Retos Fotográficos</title>
-  <style>
+<style>
   * {
     box-sizing: border-box;
     margin: 0;
@@ -22,10 +22,12 @@
     align-items: center;
   }
 
+  /* Contenedor principal responsive */
   .viewport-wrapper {
     position: relative;
     width: 100vw;
     height: 100vh;
+    max-width: 500px; /* Limita el ancho máximo en pantallas grandes */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -38,7 +40,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    objeto-position: center;
+    object-position: center;
     z-index: 1;
   }
 
@@ -51,24 +53,24 @@
     z-index: 2;
   }
 
-  /* 1. AJUSTE DE LA RULETA SOBRE EL CÍRCULO METÁLICO */
+  /* 1. RULETA CANVAS Y FLECHA ENCAJADAS */
   .canvas-overlay {
     position: absolute;
-    top: 24.5%; /* Posición vertical precisa sobre el aro */
+    top: 22%; /* Ajusta si necesitas subir/bajar la ruleta */
     left: 50%;
     transform: translateX(-50%);
-    width: 27vh; /* Tamaño reducido para encajar dentro del marco */
-    height: 27vh;
+    width: 280px; /* Ancho fijo en px para que no cambie de escala según la pantalla */
+    height: 280px;
     border-radius: 50%;
   }
 
-  /* PUNTERO ROJO ALINEADO EN LA PARTE SUPERIOR */
+  /* PUNTERO/TRIÁNGULO ROJO EN PROPORCIÓN */
   .wheel-pointer {
     position: absolute;
-    top: -12px;
+    top: -22px;
     left: 50%;
     transform: translateX(-50%);
-    width: 28px;
+    width: 45px; /* Tamaño del triángulo rojo */
     height: auto;
     z-index: 5;
     pointer-events: none;
@@ -83,11 +85,11 @@
   /* 2. TEXTO DEL RESULTADO (PLACA AMARILLA) */
   .result-overlay {
     position: absolute;
-    top: 71.5%;
+    top: 68%;
     left: 50%;
     transform: translateX(-50%);
-    width: 20vh;
-    height: 4vh;
+    width: 220px;
+    height: 45px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -97,7 +99,7 @@
 
   .result-overlay h3 {
     color: #000000;
-    font-size: clamp(0.55rem, 1.2vh, 0.8rem);
+    font-size: 0.9rem;
     text-transform: uppercase;
     line-height: 1.1;
   }
@@ -105,17 +107,17 @@
   /* 3. BOTÓN GIRAR RULETA */
   .spin-button {
     position: absolute;
-    top: 79.5%;
+    top: 77%;
     left: 50%;
     transform: translateX(-50%);
-    width: 18vh;
-    height: 4.5vh;
+    width: 200px;
+    height: 48px;
     background: url('btn-rojo.jpg') no-repeat center center;
     background-size: 100% 100%;
     border: none;
     cursor: pointer;
     color: #ffffff;
-    font-size: clamp(0.6rem, 1.4vh, 0.75rem);
+    font-size: 0.85rem;
     letter-spacing: 0.5px;
     text-transform: uppercase;
     text-shadow: 1px 1px 2px #000;
@@ -134,16 +136,16 @@
   /* 4. BOTÓN ENVIAR FOTO */
   .upload-trigger-btn {
     position: absolute;
-    top: 86.5%;
+    top: 85%;
     left: 50%;
     transform: translateX(-50%);
-    width: 18vh;
-    height: 4.2vh;
+    width: 200px;
+    height: 42px;
     background: #d9534f;
     color: #ffffff;
     border: 1px solid #000;
     border-radius: 3px;
-    font-size: clamp(0.6rem, 1.4vh, 0.75rem);
+    font-size: 0.85rem;
     font-weight: bold;
     text-transform: uppercase;
     cursor: pointer;
@@ -277,29 +279,6 @@
 
   .submit-btn:hover {
     background: #ffffff;
-  }
-
-  /* REGLAS ESPECÍFICAS PARA MÓVILES */
-  @media (max-width: 600px) {
-    .canvas-overlay {
-      width: 25.5vh;
-      height: 25.5vh;
-      top: 24.8%;
-    }
-    .result-overlay {
-      top: 71%;
-      width: 18vh;
-    }
-    .spin-button {
-      top: 79%;
-      width: 16vh;
-      height: 4vh;
-    }
-    .upload-trigger-btn {
-      top: 85.5%;
-      width: 16vh;
-      height: 3.8vh;
-    }
   }
 </style>
 </head>
