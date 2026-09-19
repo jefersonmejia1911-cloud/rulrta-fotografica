@@ -1,4 +1,10 @@
-<style>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ruleta de Retos Fotográficos</title>
+  <style>
   * {
     box-sizing: border-box;
     margin: 0;
@@ -295,3 +301,248 @@
     }
   }
 </style>
+</head>
+<body>
+
+  <div class="viewport-wrapper">
+    <img src="fondo.jpg" alt="Fondo Ruleta" class="bg-image">
+
+    <div class="interface-overlay">
+      <div class="canvas-overlay">
+        <img src="algo.jpg" alt="Puntero" class="wheel-pointer">
+        <canvas id="wheel" width="600" height="600"></canvas>
+      </div>
+      
+      <div class="result-overlay">
+        <h4 id="result-text">¡GIRA Y DESCUBRE!</h4>
+      </div>
+
+      <button id="spin-btn" class="spin-button">GIRAR RULETA</button>
+      <button id="open-modal-btn" class="upload-trigger-btn">ENVIAR FOTO</button>
+    </div>
+  </div>
+
+  <!-- MODAL: Solo pide Nombre, Instagram y Foto -->
+  <div id="form-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>ENVIAR FOTOGRAFÍA</h3>
+        <button id="close-modal-btn" class="close-modal-btn">&times;</button>
+      </div>
+
+      <form id="upload-form">
+        <div class="form-group">
+          <label>Nombre:</label>
+          <input type="text" id="form-nombre" placeholder="Tu Nombre" required class="custom-input">
+        </div>
+
+        <div class="form-group">
+          <label>Instagram:</label>
+          <input type="text" id="form-instagram" placeholder="@tu_usuario" required class="custom-input">
+        </div>
+
+        <div class="form-group">
+          <label>Archivo de Imagen:</label>
+          <label class="custom-file-upload">
+            <input type="file" id="form-file" accept="image/*" required onchange="updateFileName(this)">
+            <span id="file-label">SELECCIONAR ARCHIVO</span>
+          </label>
+        </div>
+
+        <button type="submit" id="submit-btn" class="submit-btn">SUBIR FOTO</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Enlace directo a tu Google Apps Script
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsGx4Jth899wrO6PO1j2y0o0rG5_b3-ACo3ONkDgx7xgg2igGuaVSL__-Ux70AHlObrQ/exec";
+
+    const challenges = [
+      "RETRATO INDUSTRIAL",
+      "GEOMETRÍA URBANA",
+      "SOMBRAS Y LÍNEAS",
+      "TEXTURA DE ACERO",
+      "CARGA Y MOVIMIENTO",
+      "FOTOGRAFÍA MACRO",
+      "HORA DORADA",
+      "REFLEJOS URBANOS"
+    ];
+
+    const colors = ["#ffd700", "#2b2b2b", "#ffd700", "#2b2b2b", "#ffd700", "#2b2b2b", "#ffd700", "#2b2b2b"];
+    const textColors = ["#000000", "#ffffff", "#000000", "#ffffff", "#000000", "#ffffff", "#000000", "#ffffff"];
+
+    const canvas = document.getElementById("wheel");
+    const ctx = canvas.getContext("2d");
+    const spinBtn = document.getElementById("spin-btn");
+    const resultText = document.getElementById("result-text");
+
+    const modal = document.getElementById("form-modal");
+    const openModalBtn = document.getElementById("open-modal-btn");
+    const closeModalBtn = document.getElementById("close-modal-btn");
+    const uploadForm = document.getElementById("upload-form");
+    const submitBtn = document.getElementById("submit-btn");
+
+    const numOptions = challenges.length;
+    const arcSize = (2 * Math.PI) / numOptions;
+    let currentAngle = 0;
+    let isSpinning = false;
+    let selectedChallenge = "Sin girar"; // Se actualiza automáticamente al girar
+
+    function drawWheel() {
+      const radius = canvas.width / 2;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < numOptions; i++) {
+        const angle = currentAngle + i * arcSize;
+
+        ctx.beginPath();
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.moveTo(radius, radius);
+        ctx.arc(radius, radius, radius, angle, angle + arcSize);
+        ctx.lineTo(radius, radius);
+        ctx.fill();
+
+        ctx.strokeStyle = "#111111";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(radius, radius);
+        ctx.rotate(angle + arcSize / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = textColors[i % textColors.length];
+        ctx.font = "bold 22px 'Arial Black', sans-serif";
+        ctx.fillText(challenges[i], radius - 20, 8);
+        ctx.restore();
+      }
+
+      ctx.beginPath();
+      ctx.arc(radius, radius, 40, 0, 2 * Math.PI);
+      ctx.fillStyle = "#111111";
+      ctx.fill();
+      ctx.strokeStyle = "#ffd700";
+      ctx.lineWidth = 6;
+      ctx.stroke();
+    }
+
+    function spinWheel() {
+      if (isSpinning) return;
+      isSpinning = true;
+      spinBtn.classList.add("active");
+      spinBtn.textContent = "GIRANDO...";
+      resultText.textContent = "SELECCIONANDO...";
+
+      const extraDegrees = Math.floor(Math.random() * 360);
+      const totalRotation = (5 + Math.floor(Math.random() * 3)) * 360 + extraDegrees;
+      const totalRotationRad = (totalRotation * Math.PI) / 180;
+
+      const duration = 4000;
+      const startTime = performance.now();
+      const startAngle = currentAngle;
+
+      function animate(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+
+        currentAngle = startAngle + totalRotationRad * easeOut;
+        drawWheel();
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          isSpinning = false;
+          spinBtn.classList.remove("active");
+          spinBtn.textContent = "GIRAR RULETA";
+          calculateResult();
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    function calculateResult() {
+      const normalizedAngle = (currentAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+      const pointerAngle = (1.5 * Math.PI - normalizedAngle + 2 * Math.PI) % (2 * Math.PI);
+      const selectedIndex = Math.floor(pointerAngle / arcSize);
+
+      // Guarda automáticamente el resultado
+      selectedChallenge = challenges[selectedIndex];
+      resultText.textContent = selectedChallenge;
+    }
+
+    function updateFileName(input) {
+      const label = document.getElementById('file-label');
+      if (input.files && input.files[0]) {
+        label.textContent = input.files[0].name.substring(0, 15) + '...';
+      }
+    }
+
+    openModalBtn.addEventListener("click", () => modal.classList.add("active"));
+    closeModalBtn.addEventListener("click", () => modal.classList.remove("active"));
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) modal.classList.remove("active");
+    });
+
+    // Envío del formulario
+    uploadForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      
+      const fileInput = document.getElementById("form-file");
+      if (!fileInput.files[0]) return;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "SUBIENDO...";
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        const base64Data = e.target.result.split(',')[1];
+        
+        const payload = {
+          fileName: file.name,
+          fileType: file.type,
+          fileBytes: base64Data
+        };
+
+        const nombre = encodeURIComponent(document.getElementById("form-nombre").value);
+        const instagram = encodeURIComponent(document.getElementById("form-instagram").value);
+        const reto = encodeURIComponent(selectedChallenge); // Se envía automáticamente el reto actual
+
+        const targetUrl = `${APPS_SCRIPT_URL}?nombre=${nombre}&instagram=${instagram}&reto=${reto}`;
+
+        fetch(targetUrl, {
+          method: "POST",
+          body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === "success") {
+            alert("¡Fotografía enviada exitosamente!");
+            uploadForm.reset();
+            document.getElementById("file-label").textContent = "SELECCIONAR ARCHIVO";
+            modal.classList.remove("active");
+          } else {
+            alert("Error al enviar: " + data.message);
+          }
+        })
+        .catch(err => {
+          alert("Error de conexión. Inténtalo de nuevo.");
+          console.error(err);
+        })
+        .finally(() => {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "SUBIR FOTO";
+        });
+      };
+
+      reader.readAsDataURL(file);
+    });
+
+    drawWheel();
+    spinBtn.addEventListener("click", spinWheel);
+  </script>
+</body>
+</html>
